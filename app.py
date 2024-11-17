@@ -33,7 +33,7 @@ def create_midi(progression):
         midi.instruments.append(piano)
 
         # Salvando o arquivo MIDI
-        file_path = "output.mid"
+        file_path = "/tmp/output.mid"  # Atualizado para o diretório temporário
         midi.write(file_path)
         print(f"Arquivo MIDI criado: {file_path}")
         return file_path
@@ -58,7 +58,7 @@ def generate():
             return send_file(midi_file, as_attachment=True)
         else:
             print("Arquivo MIDI não foi encontrado após criação.")
-            return jsonify({"error": "MIDI file not generated"}), 500
+            return jsonify({"error": "MIDI file not found"}), 500
     except Exception as e:
         # Retorna o erro em caso de falha
         print(f"Erro na API: {e}")
