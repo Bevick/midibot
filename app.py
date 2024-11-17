@@ -1,4 +1,4 @@
-from flask import Flask, request, send_file, jsonify
+from flask import Flask, request, send_file, jsonify, Response
 import pretty_midi
 import os
 
@@ -33,7 +33,7 @@ def create_midi(progression):
         midi.instruments.append(piano)
 
         # Salvando o arquivo MIDI
-        file_path = "/tmp/output.mid"  # Atualizado para o diretório temporário
+        file_path = "/tmp/output.mid"  # Diretório temporário
         midi.write(file_path)
         print(f"Arquivo MIDI criado: {file_path}")
         return file_path
@@ -55,7 +55,12 @@ def generate():
         # Confirma se o arquivo foi gerado e existe
         if os.path.exists(midi_file):
             print(f"Enviando o arquivo MIDI: {midi_file}")
-            return send_file(midi_file, as_attachment=True)
+            with open(midi_file, "rb") as f:
+                return Response(
+                    f.read(),
+                    mimetype="audio/midi",
+                    headers={"Content-Disposition": "attachment;filename=output.mid"}
+                )
         else:
             print("Arquivo MIDI não foi encontrado após criação.")
             return jsonify({"error": "MIDI file not found"}), 500
