@@ -1,6 +1,6 @@
-
 from flask import Flask, request, send_file
 import pretty_midi
+import os
 
 app = Flask(__name__)
 
@@ -30,6 +30,8 @@ def create_midi(progression):
         start_time += 1
 
     midi.instruments.append(piano)
+
+    # Salvando o arquivo MIDI
     file_path = "output.mid"
     midi.write(file_path)
     return file_path
@@ -37,10 +39,16 @@ def create_midi(progression):
 # Endpoint para criar MIDI
 @app.route("/generate", methods=["POST"])
 def generate():
-    data = request.json
-    progression = data.get("progression", ["E9", "C#m7", "A6(9)", "B7(13)"])
-    midi_file = create_midi(progression)
-    return send_file(midi_file, as_attachment=True)
+    try:
+        data = request.json
+        progression = data.get("progression", ["E9", "C#m7", "A6(9)", "B7(13)"])
+        midi_file = create_midi(progression)
+        if os.path.exists(midi_file):
+            return send_file(midi_file, as_attachment=True)
+        else:
+            return {"error": "File not generated"}, 500
+    except Exception as e:
+        return {"error": str(e)}, 500
 
 if __name__ == "__main__":
     app.run(debug=True)
