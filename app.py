@@ -1,4 +1,4 @@
-from flask import Flask, request, send_file
+from flask import Flask, request, send_file, jsonify
 import pretty_midi
 import os
 
@@ -40,15 +40,21 @@ def create_midi(progression):
 @app.route("/generate", methods=["POST"])
 def generate():
     try:
+        # Recebe a progressão do corpo da requisição
         data = request.json
         progression = data.get("progression", ["E9", "C#m7", "A6(9)", "B7(13)"])
+        
+        # Gera o arquivo MIDI
         midi_file = create_midi(progression)
+        
+        # Confirma se o arquivo foi gerado
         if os.path.exists(midi_file):
             return send_file(midi_file, as_attachment=True)
         else:
-            return {"error": "File not generated"}, 500
+            return jsonify({"error": "MIDI file not generated"}), 500
     except Exception as e:
-        return {"error": str(e)}, 500
+        # Retorna o erro em caso de falha
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     app.run(debug=True)
